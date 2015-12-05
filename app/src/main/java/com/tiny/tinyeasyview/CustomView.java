@@ -5,11 +5,14 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.v4.view.ViewConfigurationCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.nineoldandroids.view.ViewHelper;
 
@@ -24,6 +27,9 @@ public class CustomView extends View {
     private Paint paint;
 
     private int mPaintColor;
+    private int mTouchSlop;
+    private VelocityTracker mVelocityTracker;
+    private int mMaxinumVelocity;
 
     public CustomView(Context context) {
         super(context);
@@ -44,7 +50,10 @@ public class CustomView extends View {
         mPaintColor = typedArray.getInteger(R.styleable.CustomView_paint_color, Color.RED);
         typedArray.recycle();
 
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
 
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mMaxinumVelocity = configuration.getScaledMaximumFlingVelocity();
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(mPaintColor);
         paint.setStyle(Paint.Style.FILL);
@@ -80,6 +89,7 @@ public class CustomView extends View {
         int height = 100;
 
         if (widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.AT_MOST) {
+            //Initialize a default minimum value.
             Log.e("tiny--", "ALL AT_MOST");
             width = 200;
             height = 200;
@@ -100,28 +110,63 @@ public class CustomView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
+
+        //different device have different value
         final float x = event.getRawX();
         final float y = event.getRawY();
+        Log.i("Tiny", "x --" + x + ";y -- " + y);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                // If you don`t have to mLastX and mLastY initialization,beating effect will occur.
+                mLastX = x;
+                mLastY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float diffX = x - mLastX;
                 float diffY = y - mLastY;
 
-                float translationX = ViewHelper.getTranslationX(this) + diffX;
-                float translationY = ViewHelper.getTranslationY(this) + diffY;
+                // Filter out less than mTouchSlop movement.
+                Log.i("Tiny", "diffX --" + Math.abs(diffX) + ";diffY -- " + Math.abs(diffY) + ";touchSlop--" + mTouchSlop);
+                if (Math.abs(diffX) > mTouchSlop || Math.abs(diffY) > mTouchSlop) {
+                    Log.d("Tiny", "translation");
+                    float translationX = ViewHelper.getTranslationX(this) + diffX;
+                    float translationY = ViewHelper.getTranslationY(this) + diffY;
+                    ViewHelper.setTranslationX(this, translationX);
+                    ViewHelper.setTranslationY(this, translationY);
+                    mLastX = x;
+                    mLastY = y;
+                }
 
-                ViewHelper.setTranslationX(this, translationX);
-                ViewHelper.setTranslationY(this, translationY);
                 break;
             case MotionEvent.ACTION_UP:
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                velocityTracker.computeCurrentVelocity(1000, mMaxinumVelocity);
+                float mXVelocity = velocityTracker.getXVelocity();
+                float mYVelocity = velocityTracker.getYVelocity();
+
+                Log.i("Tiny", "mXVelocity -- " + (mXVelocity - mLastX) + ";mYVelocity -- " + (mYVelocity - mLastY));
+                float translationX = ViewHelper.getTranslationX(this) + (mXVelocity - mLastX);
+                float translationY = ViewHelper.getTranslationY(this) + (mYVelocity - mLastY);
+                ViewHelper.setTranslationX(this, translationX);
+                ViewHelper.setTranslationY(this, translationY);
+                endDrag();
+                break;
             case MotionEvent.ACTION_CANCEL:
                 break;
         }
-
-        mLastX = x;
-        mLastY = y;
+        Log.i("Tiny", "mLastX --" + mLastX + ";mLastY--" + mLastY);
         return true;
+    }
+
+    private void endDrag() {
+        if (mVelocityTracker != null) {
+            mVelocityTracker.clear();
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
     }
 }
