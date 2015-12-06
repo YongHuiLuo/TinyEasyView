@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.Scroller;
 
 import com.nineoldandroids.view.ViewHelper;
 
@@ -30,6 +31,8 @@ public class CustomView extends View {
     private int mTouchSlop;
     private VelocityTracker mVelocityTracker;
     private int mMaxinumVelocity;
+    private float maxVelocityX;
+    private float maxVelocityY;
 
     public CustomView(Context context) {
         super(context);
@@ -124,6 +127,9 @@ public class CustomView extends View {
                 // If you don`t have to mLastX and mLastY initialization,beating effect will occur.
                 mLastX = x;
                 mLastY = y;
+                if (velocityValueChangeListener != null){
+                    velocityValueChangeListener.onVelocityValueChange(0,0,0,0);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 float diffX = x - mLastX;
@@ -148,11 +154,25 @@ public class CustomView extends View {
                 float mXVelocity = velocityTracker.getXVelocity();
                 float mYVelocity = velocityTracker.getYVelocity();
 
+                if (mXVelocity > maxVelocityX){
+                    maxVelocityX = mXVelocity;
+                }
+
+                if (mYVelocity > maxVelocityY){
+                    maxVelocityY = mYVelocity;
+                }
+
                 Log.i("Tiny", "mXVelocity -- " + (mXVelocity - mLastX) + ";mYVelocity -- " + (mYVelocity - mLastY));
-                float translationX = ViewHelper.getTranslationX(this) + (mXVelocity - mLastX);
-                float translationY = ViewHelper.getTranslationY(this) + (mYVelocity - mLastY);
-                ViewHelper.setTranslationX(this, translationX);
-                ViewHelper.setTranslationY(this, translationY);
+
+                Scroller scroller = new Scroller(getContext());
+                scroller.startScroll((int)mLastX,(int)mLastY,(int)mXVelocity,(int)mYVelocity);
+                if (velocityValueChangeListener != null){
+                    velocityValueChangeListener.onVelocityValueChange(mXVelocity,maxVelocityX,mYVelocity,maxVelocityY);
+                }
+//                float translationX = ViewHelper.getTranslationX(this) + (mXVelocity - mLastX);
+//                float translationY = ViewHelper.getTranslationY(this) + (mYVelocity - mLastY);
+//                ViewHelper.setTranslationX(this, translationX);
+//                ViewHelper.setTranslationY(this, translationY);
                 endDrag();
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -168,5 +188,15 @@ public class CustomView extends View {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+    }
+
+    private  VelocityValueChangeListener velocityValueChangeListener;
+
+    public void setVelocityValueChangeListener(VelocityValueChangeListener velocityValueChangeListener) {
+        this.velocityValueChangeListener = velocityValueChangeListener;
+    }
+
+    public interface VelocityValueChangeListener{
+        void onVelocityValueChange(float velocityX,float maxVelocityX,float velocityY,float maxVelocityY);
     }
 }
