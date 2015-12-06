@@ -9,4 +9,5 @@
     2) How to customize the View by directly extents from android.view.View.
     3) Example of using PopupWindow.
     4) How to use TouchSlop.
-    5) Use android.view.View of the post method.
+    5) It's a helper for tracking the velocity of touch events, for implementing flinging and other such gestures.
+    6) Use android.view.View of the post method.
