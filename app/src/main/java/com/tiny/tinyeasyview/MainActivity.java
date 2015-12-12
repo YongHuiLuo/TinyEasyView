@@ -1,5 +1,6 @@
 package com.tiny.tinyeasyview;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -9,55 +10,36 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.SimpleAdapter;
+import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.Inflater;
 
-public class MainActivity extends AppCompatActivity implements CustomView.VelocityValueChangeListener, View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    private CustomView customView;
-    private TextView txtVelocityX, txtMaxVelocityX, txtVelocityY, txtMaxVelocityY;
-
-    private PopupWindow popupWindow;
-
+    private ListView listView;
+    private List<String> mData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        customView = (CustomView) findViewById(R.id.custom_view);
-        txtVelocityX = (TextView) findViewById(R.id.velocityX);
-        txtMaxVelocityX = (TextView) findViewById(R.id.maxVelocityX);
-        txtVelocityY = (TextView) findViewById(R.id.velocityY);
-        txtMaxVelocityY = (TextView) findViewById(R.id.maxVelocityY);
 
-        customView.setVelocityValueChangeListener(this);
-        customView.setOnTouchListener(this);
+        mData = new ArrayList<>();
+        mData.add("custom view activity");
+        mData.add("drawable activity");
 
-        //the third point : Resolve the Exception that PopupWindow $BadTokenException, use view.post()
-        customView.post(new Runnable() {
-            @Override
-            public void run() {
-                showPopWindow();
-            }
-        });
-    }
-
-    private void showPopWindow() {
-        //the second point: Example of using PopupWindow
-        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View view = layoutInflater.inflate(R.layout.pop_window_layout, null);
-        if (popupWindow == null) {
-            popupWindow = new PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-        popupWindow.showAsDropDown(customView, 50, 10);
-    }
-
-    private void initView(float velocityX, float maxVelocityX, float velocityY, float maxVelocityY) {
-        txtVelocityX.setText("custom view velocityX is : " + velocityX);
-        txtMaxVelocityX.setText("custom view maxVelocityX is : " + maxVelocityX);
-        txtVelocityY.setText("custom view velocityY is : " + velocityY);
-        txtMaxVelocityY.setText("custom view maxVelocityY is : " + maxVelocityY);
+        listView = (ListView) findViewById(R.id.list_view);
+        listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mData));
+        listView.setOnItemClickListener(this);
     }
 
     @Override
@@ -76,17 +58,15 @@ public class MainActivity extends AppCompatActivity implements CustomView.Veloci
     }
 
     @Override
-    public void onVelocityValueChange(float velocityX, float maxVelocityX, float velocityY, float maxVelocityY) {
-        initView(velocityX, maxVelocityX, velocityY, maxVelocityY);
-    }
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String content = (String) parent.getAdapter().getItem(position);
+        if (content.contains("custom view activity")){
+            Intent intent = new Intent();
+//            intent.setAction("android.intent.action.CUSTOMVIEW");
+            intent.setClass(this,CustomViewActivity.class);
+            startActivity(intent);
+        }else if(content.contains("drawable activity")){
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        //The first point : The onTouch and onTouchEvent execution order
-        if (popupWindow != null) {
-            popupWindow.dismiss();
         }
-        //OnTouchEvent method will not be executed,if return true.
-        return false;
     }
 }
