@@ -33,6 +33,7 @@ public class CustomView extends View {
     private int mMaxinumVelocity;
     private float maxVelocityX;
     private float maxVelocityY;
+    private Scroller mScroller;
 
     public CustomView(Context context) {
         super(context);
@@ -53,10 +54,12 @@ public class CustomView extends View {
         mPaintColor = typedArray.getInteger(R.styleable.CustomView_paint_color, Color.RED);
         typedArray.recycle();
 
-        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        mScroller = new Scroller(getContext());
 
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
         mMaxinumVelocity = configuration.getScaledMaximumFlingVelocity();
+
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(mPaintColor);
         paint.setStyle(Paint.Style.FILL);
@@ -127,8 +130,8 @@ public class CustomView extends View {
                 // If you don`t have to mLastX and mLastY initialization,beating effect will occur.
                 mLastX = x;
                 mLastY = y;
-                if (velocityValueChangeListener != null){
-                    velocityValueChangeListener.onVelocityValueChange(0,0,0,0);
+                if (velocityValueChangeListener != null) {
+                    velocityValueChangeListener.onVelocityValueChange(0, 0, 0, 0);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -154,32 +157,51 @@ public class CustomView extends View {
                 float mXVelocity = velocityTracker.getXVelocity();
                 float mYVelocity = velocityTracker.getYVelocity();
 
-                if (mXVelocity > maxVelocityX){
+                if (mXVelocity > maxVelocityX) {
                     maxVelocityX = mXVelocity;
                 }
 
-                if (mYVelocity > maxVelocityY){
+                if (mYVelocity > maxVelocityY) {
                     maxVelocityY = mYVelocity;
                 }
 
                 Log.i("Tiny", "mXVelocity -- " + (mXVelocity - mLastX) + ";mYVelocity -- " + (mYVelocity - mLastY));
 
-                Scroller scroller = new Scroller(getContext());
-                scroller.startScroll((int)mLastX,(int)mLastY,(int)mXVelocity,(int)mYVelocity);
-                if (velocityValueChangeListener != null){
-                    velocityValueChangeListener.onVelocityValueChange(mXVelocity,maxVelocityX,mYVelocity,maxVelocityY);
+                final int mScrollX = getScrollX();
+                final int mScrollY = getScrollY();
+
+                Log.i("tiny", "mScrollX --" + mScrollX + ";mScrollY --" + mScrollY);
+                //smoothScrollBy( mScrollX, mScrollY);
+                mScroller.fling((int) mLastX, (int) mLastY, (int) mXVelocity, (int) mYVelocity, 0, (int) maxVelocityX, 0, mMaxinumVelocity);
+                if (velocityValueChangeListener != null) {
+                    velocityValueChangeListener.onVelocityValueChange(mXVelocity, maxVelocityX, mYVelocity, maxVelocityY);
                 }
-//                float translationX = ViewHelper.getTranslationX(this) + (mXVelocity - mLastX);
-//                float translationY = ViewHelper.getTranslationY(this) + (mYVelocity - mLastY);
-//                ViewHelper.setTranslationX(this, translationX);
-//                ViewHelper.setTranslationY(this, translationY);
-                endDrag();
+                //invalidate();
+                //float translationX = ViewHelper.getTranslationX(this) + (mXVelocity - mLastX);
+                //float translationY = ViewHelper.getTranslationY(this) + (mYVelocity - mLastY);
+                //ViewHelper.setTranslationX(this, translationX);
+                //ViewHelper.setTranslationY(this, translationY);
+                //endDrag();
                 break;
             case MotionEvent.ACTION_CANCEL:
                 break;
         }
         Log.i("Tiny", "mLastX --" + mLastX + ";mLastY--" + mLastY);
         return true;
+    }
+
+    private void smoothScrollBy(int dx, int dy) {
+        mScroller.startScroll((int) mLastX, (int) mLastY, dx, dy, 1000);
+        invalidate();
+    }
+
+    @Override
+    public void computeScroll() {
+        if (mScroller.computeScrollOffset()) {
+            Log.i("tiny", "computeScroll getCurrX --" + mScroller.getCurrX() + ";getCurrY--" + mScroller.getCurrY());
+            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            postInvalidate();
+        }
     }
 
     private void endDrag() {
@@ -190,13 +212,13 @@ public class CustomView extends View {
         }
     }
 
-    private  VelocityValueChangeListener velocityValueChangeListener;
+    private VelocityValueChangeListener velocityValueChangeListener;
 
     public void setVelocityValueChangeListener(VelocityValueChangeListener velocityValueChangeListener) {
         this.velocityValueChangeListener = velocityValueChangeListener;
     }
 
-    public interface VelocityValueChangeListener{
-        void onVelocityValueChange(float velocityX,float maxVelocityX,float velocityY,float maxVelocityY);
+    public interface VelocityValueChangeListener {
+        void onVelocityValueChange(float velocityX, float maxVelocityX, float velocityY, float maxVelocityY);
     }
 }
