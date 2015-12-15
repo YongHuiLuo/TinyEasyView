@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+ src = "@[package:]drawable/drawable_resource"
+ android:antialias = ["true" | "false"]  - 开启图片抗锯齿功能，平滑
+ android:dither = ["true" | "false"] - 开启抖动效果，低分辨率手机，显示不过于失真(一个像素占4个字节)
+ android:filter = ["true" | "false"] - 开启过滤效果，压缩或拉伸，提高显示效果
+ android:gravity = [|] - 图片定位
+ android:mipmap = ["true" | "false"] - 纹理效果，默认不开启
+ android:tileMode = ["disable" | "clamp" | "repeat" | "mirror"] - 平铺模式
+-->
+
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_launcher"
+    android:antialias="true"
+    android:dither="true"
+    android:filter="true"
+    android:gravity="top|right"
+    android:mipMap="false"
+    android:tileMode="mirror">
+</bitmap>

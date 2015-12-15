@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bitmap_drawable_bg"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bitmap_drawable_test"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        android:text="Change BitmapDrawable TileMode" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_disable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disable" />
+
+        <Button
+            android:id="@+id/btn_repeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Repeat" />
+
+        <Button
+            android:id="@+id/btn_mirror"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="mirror" />
+
+        <Button
+            android:id="@+id/btn_clamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="clamp" />
+    </LinearLayout>
+</LinearLayout>

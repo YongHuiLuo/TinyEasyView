@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private ListView listView;
     private List<String> mData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,13 +61,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String content = (String) parent.getAdapter().getItem(position);
-        if (content.contains("custom view activity")){
+        if (content.contains("custom view activity")) {
             Intent intent = new Intent();
 //            intent.setAction("android.intent.action.CUSTOMVIEW");
-            intent.setClass(this,CustomViewActivity.class);
+            intent.setClass(this, CustomViewActivity.class);
             startActivity(intent);
-        }else if(content.contains("drawable activity")){
-
+        } else if (content.contains("drawable activity")) {
+            Intent intent = new Intent();
+            intent.setClass(this,DrawableActivity.class);
+            startActivity(intent);
         }
     }
 }

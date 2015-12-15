@@ -22,6 +22,9 @@
                 <action android:name="android.intent.action.CUSTOMVIEW"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".DrawableActivity">
+        </activity>
     </application>
 
 </manifest>
