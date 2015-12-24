@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mData = new ArrayList<>();
         mData.add("custom view activity");
         mData.add("drawable activity");
+        mData.add("RxJava activity");
 
         listView = (ListView) findViewById(R.id.list_view);
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mData));
