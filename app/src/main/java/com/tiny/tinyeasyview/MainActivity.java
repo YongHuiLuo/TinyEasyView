@@ -71,6 +71,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             Intent intent = new Intent();
             intent.setClass(this,DrawableActivity.class);
             startActivity(intent);
+        } else if(content.contains("RxJava activity")){
+            Intent intent = new Intent();
+            intent.setClass(this,RxJavaActivity.class);
+            startActivity(intent);
         }
     }
 }
