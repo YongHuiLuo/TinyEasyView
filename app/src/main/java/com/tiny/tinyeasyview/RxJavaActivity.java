@@ -1,7 +1,6 @@
 package com.tiny.tinyeasyview;
 
 import android.graphics.drawable.Drawable;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,7 +13,6 @@ import rx.Observer;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -29,9 +27,13 @@ public class RxJavaActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_rx_android_layout);
+        rxBaseExample();
+        usageExample();
+        schedulerExample();
+    }
 
+    private void rxBaseExample() {
         /**
          * 0 ： Schedulers
          */
@@ -144,9 +146,6 @@ public class RxJavaActivity extends AppCompatActivity {
 //        };
 //
 //        observable.subscribe(onNextAction, onErrorAction, onCompleteAction);
-
-
-        usageExample();
     }
 
     private void usageExample() {
@@ -198,5 +197,35 @@ public class RxJavaActivity extends AppCompatActivity {
         });
 
         //这里方法里的例子，并没有说明RxAndroid有什么过人之处，反而增加了，没有必要的代码。
+    }
+
+    private void schedulerExample() {
+        img_rx = (ImageView) findViewById(R.id.img_rx);
+        Observable.create(new Observable.OnSubscribe<Drawable>() {
+            @Override
+            public void call(Subscriber<? super Drawable> subscriber) {
+                Drawable drawable = getResources().getDrawable(R.drawable.rx_android_example_1);
+                subscriber.onNext(drawable);
+                subscriber.onCompleted();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Drawable>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError");
+                    }
+
+                    @Override
+                    public void onNext(Drawable drawable) {
+                        img_rx.setImageDrawable(drawable);
+                        Log.d(TAG, "onNext");
+                    }
+                });
     }
 }
