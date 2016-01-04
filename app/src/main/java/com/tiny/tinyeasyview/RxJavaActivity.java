@@ -1,11 +1,15 @@
 package com.tiny.tinyeasyview;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.tiny.tools.BitmapUtil;
+
+import java.io.File;
 import java.util.ArrayList;
 
 import rx.Observable;
@@ -14,6 +18,7 @@ import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -31,6 +36,7 @@ public class RxJavaActivity extends AppCompatActivity {
         rxBaseExample();
         usageExample();
         schedulerExample();
+        mapExample();
     }
 
     private void rxBaseExample() {
@@ -209,7 +215,7 @@ public class RxJavaActivity extends AppCompatActivity {
                 subscriber.onCompleted();
             }
         }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(new Observer<Drawable>() {
                     @Override
                     public void onCompleted() {
@@ -228,4 +234,21 @@ public class RxJavaActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private void mapExample() {
+        final ImageView img_rx_2 = (ImageView) findViewById(R.id.img_rx_2);
+        Observable.just("test.jpg")
+                .map(new Func1<String, Bitmap>() {
+                    @Override
+                    public Bitmap call(String fileName) {
+                        return BitmapUtil.getBitmapFromPath(fileName);
+                    }
+                }).subscribe(new Action1<Bitmap>() {
+            @Override
+            public void call(Bitmap bitmap) {
+                img_rx_2.setImageBitmap(bitmap);
+            }
+        });
+    }
+
 }

@@ -11,4 +11,11 @@
         android:layout_width="300dp"
         android:layout_height="300dp" />
 
+    <ImageView
+        android:id="@+id/img_rx_2"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp" />
+
 </LinearLayout>
