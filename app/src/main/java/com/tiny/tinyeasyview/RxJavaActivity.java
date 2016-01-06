@@ -7,16 +7,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.tiny.model.Student;
 import com.tiny.tools.BitmapUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -29,6 +32,7 @@ public class RxJavaActivity extends AppCompatActivity {
     private final static String TAG = "RxJava";
     private ImageView img_rx;
     private Button click_me;
+    private TextView txt_thread_log;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +53,13 @@ public class RxJavaActivity extends AppCompatActivity {
 
         //liftExample();
 
-        composeExample();
+        //composeExample();
+
+        schedulerMultiExample();
     }
 
     private void findView() {
+        txt_thread_log = (TextView) findViewById(R.id.txt_thread_log);
         click_me = (Button) findViewById(R.id.click_me);
     }
 
@@ -368,7 +375,6 @@ public class RxJavaActivity extends AppCompatActivity {
 //                });
     }
 
-
     private void liftExample() {
         Observable.just(1, 2)
                 .lift(new Observable.Operator<String, Integer>() {
@@ -452,6 +458,74 @@ public class RxJavaActivity extends AppCompatActivity {
                 .lift(operator4);
     }
 
+    private void schedulerMultiExample() {
+        txt_thread_log.setText("main thread id =" + Thread.currentThread().getId());
+        Log.d("Tiny", "main thread id =" + Thread.currentThread().getId());
+        Observable.just(1, 2, 3, 4)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.newThread())
+                .map(new Func1<Integer, String>() {
+                    @Override
+                    public String call(Integer integer) {
+                        txt_thread_log.setText(txt_thread_log.getText() + "\n" + "Schedulers.newThread() thread id =" + Thread.currentThread().getId());
+                        Log.d("Tiny", "Schedulers.newThread() thread id =" + Thread.currentThread().getId());
+                        return "5" + integer;
+                    }
+                })
+                .observeOn(Schedulers.io())
+                .map(new Func1<String, Integer>() {
+                    @Override
+                    public Integer call(String s) {
+                        txt_thread_log.setText(txt_thread_log.getText() + "\n" + "Schedulers.io() thread id =" + Thread.currentThread().getId());
+                        Log.d("Tiny", "Schedulers.io() thread id =" + Thread.currentThread().getId());
+                        return Integer.parseInt(s);
+                    }
+                })
+                .observeOn(Schedulers.from(new Executor() {
+                    @Override
+                    public void execute(Runnable command) {
+                        new Thread(command).start();
+                    }
+                }))
+                .map(new Func1<Integer, String>() {
+                    @Override
+                    public String call(Integer integer) {
+                        txt_thread_log.setText(txt_thread_log.getText() + "\n" + "Executor thread id =" + Thread.currentThread().getId());
+                        Log.d("Tiny", "Executor thread id =" + Thread.currentThread().getId());
+                        return "6" + integer;
+                    }
+                })
+                .observeOn(Schedulers.computation())
+                .map(new Func1<String, Integer>() {
+                    @Override
+                    public Integer call(String s) {
+                        txt_thread_log.setText(txt_thread_log.getText() + "\n" + "Schedulers.computation() thread id =" + Thread.currentThread().getId());
+                        Log.d("Tiny", "Schedulers.computation() thread id =" + Thread.currentThread().getId());
+                        return Integer.parseInt(s);
+                    }
+                })
+                .observeOn(Schedulers.immediate())
+                .map(new Func1<Integer, String>() {
+                    @Override
+                    public String call(Integer integer) {
+                        txt_thread_log.setText(txt_thread_log.getText() + "\n" + "Schedulers.immediate() thread id =" + Thread.currentThread().getId());
+                        Log.d("Tiny", "Schedulers.immediate() thread id =" + Thread.currentThread().getId());
+                        return "7" + integer;
+                    }
+                })
+                .observeOn(Schedulers.trampoline())
+                .map(new Func1<String, Integer>() {
+                    @Override
+                    public Integer call(String s) {
+                        txt_thread_log.setText(txt_thread_log.getText() + "\n" + "Schedulers.trampoline() thread id =" + Thread.currentThread().getId());
+                        Log.d("Tiny", "Schedulers.trampoline() thread id =" + Thread.currentThread().getId());
+                        return Integer.parseInt(s);
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber1);
+    }
+
     Subscriber<Integer> subscriber1 = new Subscriber<Integer>() {
         @Override
         public void onCompleted() {
@@ -463,7 +537,9 @@ public class RxJavaActivity extends AppCompatActivity {
 
         @Override
         public void onNext(Integer integer) {
-            Log.d("Tiny", "compose 1 --" + integer);
+            txt_thread_log.setText(txt_thread_log.getText() + "\n" + "AndroidSchedulers.mainThread() thread id =" + Thread.currentThread().getId() + "\n" + "compose --" + integer);
+            Log.d("Tiny", "AndroidSchedulers.mainThread() thread id =" + Thread.currentThread().getId());
+            Log.d("Tiny", "compose --" + integer);
         }
     };
 
@@ -585,7 +661,7 @@ public class RxJavaActivity extends AppCompatActivity {
         }
     };
 
-    public class MyTransformer implements Observable.Transformer<Integer,Integer>{
+    public class MyTransformer implements Observable.Transformer<Integer, Integer> {
         @Override
         public Observable<Integer> call(Observable<Integer> observable) {
             return observable
