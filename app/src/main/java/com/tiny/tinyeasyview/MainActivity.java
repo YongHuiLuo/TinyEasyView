@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mData = new ArrayList<>();
         mData.add("custom view activity");
         mData.add("drawable activity");
-        mData.add("RxJava activity");
 
         listView = (ListView) findViewById(R.id.list_view);
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mData));
@@ -70,10 +69,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else if (content.contains("drawable activity")) {
             Intent intent = new Intent();
             intent.setClass(this,DrawableActivity.class);
-            startActivity(intent);
-        } else if(content.contains("RxJava activity")){
-            Intent intent = new Intent();
-            intent.setClass(this,RxJavaActivity.class);
             startActivity(intent);
         }
     }

@@ -29,7 +29,6 @@
         <activity android:name=".DrawableActivity">
         </activity>
 
-        <activity android:name=".RxJavaActivity"></activity>
     </application>
 
 </manifest>
